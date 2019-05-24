@@ -59,44 +59,58 @@ public class JavaApplication2 {
         addCards(player, deck);
         addCards(dealer, deck);
         
-        
-        
-        
-        while(choice == 1){
-            
-            System.out.println("Your Sum : " + player.getSum());
-            System.out.println("WOULD YOU LIKE TO HIT");
-            System.out.println("(1)Yes or (0)No");
-            choice = Integer.parseInt(scan.nextLine());
-            
-            if(choice == 1){
-                hit(player, deck, c);
-                c++;
-            }
-            if(player.getSum() > WIN){
-                System.out.println("BUST");
-                choice = 0;
-            }
-        }
-        if(dealer.getSum() < 17){
-            while(dealer.getSum() < 17){
-                hit(dealer, deck, c);
-                c++;
-                System.out.println(dealer.getSum());
-                if(dealer.getSum() > WIN){
-                    System.out.println("BUST");
-                }
-            }
+        if(player.getSum() == WIN){
+            System.out.println("YOU HAVE 21");
+            System.out.println("YOU WIN");
         }
         else{
-            System.out.println(dealer.getSum());
+
+            while(choice == 1){
+
+                System.out.println("Your Sum : " + player.getSum());
+                System.out.println("WOULD YOU LIKE TO HIT");
+                System.out.println("(1)Yes or (0)No");
+                choice = Integer.parseInt(scan.nextLine());
+
+                if(choice == 1){
+                    hit(player, deck, c);
+                    c++;
+                }
+                if(player.getSum() == 21){
+                    System.out.println("YOU HAVE 21");
+                    System.out.println("YOU WIN");
+                    choice = 0;
+                }
+                else if(player.getSum() > WIN){
+                    aceManage(player, deck);
+                    if(player.getSum() > WIN){
+                        System.out.println("BUST");
+                        choice = 0;
+                    }
+                }
+            }
+            if(dealer.getSum() < 17){
+                while(dealer.getSum() < 17){
+                    hit(dealer, deck, c);
+                    c++;
+                    System.out.println(dealer.getSum());
+                    if(dealer.getSum() > WIN){
+                        System.out.println("BUST");
+                    }
+                }
+            }
+            else{
+                System.out.println(dealer.getSum());
+            }
         }
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////
     public static void showTable(BjHand a, BjHand b, Deck d){
         System.out.println("DEALER CARDS");
         d.cards[b.hand[0]].showCard();
-        System.out.println("[FACE-DOWN]\n");
+//        System.out.println("[FACE-DOWN]\n");
+        d.cards[b.hand[1]].showCard();
+        System.out.println("");
         
         System.out.println("YOUR CARDS");
         for (int i = 0; i < 2; i++) {
@@ -109,33 +123,75 @@ public class JavaApplication2 {
     
     public static void addCards(BjHand a, Deck d){
         int sum = 0;
+        int aces = 0;
         for (int i = 0; i < 2; i++) {
             if(d.cards[a.hand[i]].fValue > 10){
                 sum += 10;
+            }
+            else if(d.cards[a.hand[i]].fValue == 1){
+                sum += 11;
+                aces++;
             }
             else {
                 sum += d.cards[a.hand[i]].fValue;
             }
         }
-        a.setSum(sum);
-    }
-    public static void addCards(BjHand a, Card c, Deck d){
         
+        if(aces == 2){
+            sum-=10;
+        }
+        
+        a.setNAces(aces);
+        a.setSum(sum);
     }
     
     public static void hit(BjHand a, Deck d, int c){
         
         int sum = a.getSum();
+        int aces = 0;
+        boolean bust = false;
+        boolean done = false;
+        
         
         d.cards[c].showCard();
         System.out.println("");
         
         if(d.cards[c].fValue > 10){
-            a.setSum(sum + 10);
+            sum += 10;
         }
         else{
-            a.setSum(sum + d.cards[c].fValue);
+            if(d.cards[c].face.equals("Ace")){
+                sum += 11;
+                aces ++;
+            }
+            else{
+                sum += d.cards[c].fValue;
+            }
+        }
+            
+        a.setNAces(a.getNAces() + aces);
+        a.setSum(sum);
+    }
+    
+    public static void aceManage(BjHand a, Deck d){
+        int aces = a.getNAces();
+        int sum = a.getSum();
+        boolean safe = false;
+        
+        while(!safe){
+            if(aces > 0){
+                sum -= 10;
+                if(sum < 21){
+                    safe = true;
+                }
+                aces--;
+            }
+            else{
+                safe = true;
+            }
         }
         
+        a.setSum(sum);
+        a.setNAces(aces);
     }
 }
